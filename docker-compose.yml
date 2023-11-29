@@ -1,0 +1,59 @@
+version: "3.3"
+   
+services:
+  backend-db:
+    image: postgres:13.2-alpine
+    container_name: backend-db
+    volumes: 
+      - backend-data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      PG_SYSTEM_MAX_CONNECTIONS: ${PG_SYSTEM_MAX_CONNECTIONS}
+    ports:
+      - ${PG_PORT}:${PG_PORT}
+    networks:
+      - linep-network
+  backend:
+    build:
+      context: ./backend/linepsite/
+      dockerfile: Dockerfile
+    container_name: backend
+    command: ${COMMAND}
+    volumes:
+      - .:/code
+    ports:
+      - ${BACK_PORT}:${BACK_PORT}
+      - "5678:5678"
+    env_file:
+      - .env
+    depends_on:
+      - backend-db
+    networks:
+      - linep-network
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend/
+      args:
+        ENV: ${ENV}
+        REACT_APP_API_SERVER_ADDRESS: ${REACT_APP_API_SERVER_ADDRESS}
+        REACT_APP_WS_SERVER_ADDRESS: ${REACT_APP_WS_SERVER_ADDRESS}
+    volumes:
+      - './:/app/frontend'
+      - './frontend/node_modules:/app/frontend/node_modules'
+    ports:
+      - ${PORT}:${PORT}
+    stdin_open: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: ${COMMAND}
+    networks:
+      - linep-network
+
+volumes: 
+  backend-data:
+
+networks:
+  linep-network:
