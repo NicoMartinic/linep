@@ -1,22 +1,21 @@
 # To start the docker container for the frontend you need to take the following steps
 
-    # If you don't have docker/docker-compose you need to install it
-    * Docker for Linux:
-        * https://docs.docker.com/engine/install/ubuntu/
-    * Docker for Windows:
-        * https://docs.docker.com/desktop/install/windows-install/
+# If you don't have docker/docker-compose you need to install it
+* Docker for Linux:
+    * https://docs.docker.com/engine/install/ubuntu/
+* Docker for Windows:
+    * https://docs.docker.com/desktop/install/windows-install/
 
 # Next you need to open a terminal where the project folder is and execute the following commands 
 # For example: C:\Users\nicom\OneDrive\Documents\GitHub\linep>
 
-    * Execute docker-compose:
-        * `docker-compose build` 
-        * `docker-compose up -d`
+* Execute docker-compose:
+    * `docker-compose build` 
+    * `docker-compose up -d`
 
 * Once the containers are up we need to make the migrations:
 * On the terminal:
     * `docker exec -it backend bash` 
-    # Once inside the container
     * `python3 manage.py makemigrations app`
     * `python3 manage.py migrate`
 
