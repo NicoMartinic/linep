@@ -25,6 +25,6 @@ static_urls = [
 ]
 
 urlpatterns = [
-    path('', include('backend.urls')),
+    path('', include('app.urls')),
     path('admin/', admin.site.urls),
 ] + static_urls

@@ -1,5 +1,5 @@
 from django.contrib.auth.models import Group
-from . import models
+from app import models
 from rest_framework import serializers
 
 class GroupSerializer(serializers.ModelSerializer):    

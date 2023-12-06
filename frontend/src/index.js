@@ -32,7 +32,7 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
         optimism,
         arbitrum,
         sepolia,
-        ...(process.env.REACT_APP_ENABLE_TESTNETS === "true" ? [sepolia] : []),
+        ...( [sepolia] ),
     ],
     [
         alchemyProvider({ apiKey: "ovyWWbtstGWDbJ0bR5y-MyE9w104QFSm" }),

@@ -3,11 +3,11 @@ from django.http import JsonResponse
 from django.contrib.auth.models import  Group
 from django.conf import settings
 from django.db import transaction
-from backend import serializers
-from backend import models
+from app import serializers
+from app.models import Room, CustomUser
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from backend.utils import error_log, manage_exception
+from app.utils import error_log, manage_exception
 from rest_framework import permissions, status
 from django.db import models as dmodels
 from datetime import datetime
@@ -26,13 +26,13 @@ def create_room(request):
             and 'game' in request.data
         ):
             
-            user = models.CustomUser.objects.get(public_key=request.data['user_public_key'])
+            user = CustomUser.objects.get(public_key=request.data['user_public_key'])
 
-            users = models.CustomUser.objects.filter(public_key__in=request.data['players']).distinct()
+            users = CustomUser.objects.filter(public_key__in=request.data['players']).distinct()
 
             with transaction.atomic():
                 
-                room = models.Room(
+                room = Room(
                     created_by= user,
                     public= request.data['public'],
                     tickets = request.data['amount'],
@@ -75,7 +75,7 @@ def edit_room(request, id):
             
             with transaction.atomic():
             
-                room = models.Room.objects.filter(id=id).first()
+                room = Room.objects.filter(id=id).first()
 
                 if room is None:
                     return JsonResponse({'msg': 'Room not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -88,7 +88,7 @@ def edit_room(request, id):
                     room.status = request.data['status'] 
                 
                 if request.data['leave'] is not None and request.data['leave'] != '':
-                    not_leave = models.CustomUser.objects.filter(public_key__in=request.data['leave'])
+                    not_leave = CustomUser.objects.filter(public_key__in=request.data['leave'])
                     room.players.set(not_leave) 
                     for x in range(0,len(room.players_ready)):
                         if room.players_ready[x] == 'True':
@@ -100,14 +100,14 @@ def edit_room(request, id):
                 
                 if request.data['players'] is not None and request.data['players'] != '':
 
-                    players = models.CustomUser.objects.filter(public_key=request.data['players']).first()
+                    players = CustomUser.objects.filter(public_key=request.data['players']).first()
                     room.players.add(players)
                     array = room.players_ready
                     array.append(False)
                     room.players_ready = array
 
                 if request.data['invited_players'] is not None and request.data['invited_players'] != '':
-                    invited_players = models.CustomUser.objects.filter(public_key__in=request.data['invited_players'])
+                    invited_players = CustomUser.objects.filter(public_key__in=request.data['invited_players'])
                     room.invited_players.set(invited_players)
 
                 if request.data['ready'] is not None and request.data['ready'] != '':
@@ -121,7 +121,7 @@ def edit_room(request, id):
                         room.status = 'Playing'
 
                 if request.data['winner'] is not None and request.data['winner'] != '':
-                    winner = models.CustomUser.objects.filter(public_key=request.data['winner']).first()
+                    winner = CustomUser.objects.filter(public_key=request.data['winner']).first()
                     if winner:
                         room.winner = winner                                                        
                         room.status = 'Closed'
@@ -185,56 +185,56 @@ def filter_rooms(request):
             order_by = request.data['order_by'] 
             order = request.data['order'] #asc, desc
 
-            filters = dmodels.Q()
+            filters = Q()
 
             #created_at 
             if date_since and date_until:
-                filters &= dmodels.Q(created_at__range=(date_since, date_until))
+                filters &= Q(created_at__range=(date_since, date_until))
             else:
                 if date_since:
-                    filters &= dmodels.Q(created_at__gte=date_since)
+                    filters &= Q(created_at__gte=date_since)
                 if date_until:
-                    filters &= dmodels.Q(created_at__lte=date_until)
+                    filters &= Q(created_at__lte=date_until)
             
             if owner:
-                filters &= dmodels.Q(created_by__public_key=owner)
+                filters &= Q(created_by__public_key=owner)
 
             if winner:
-                filters &= dmodels.Q(winner__public_key=winner)
+                filters &= Q(winner__public_key=winner)
             
             if player:
-                filters &= dmodels.Q(players__public_key=player)
+                filters &= Q(players__public_key=player)
 
             if status is not None:
-                filters &= dmodels.Q(status=status)
+                filters &= Q(status=status)
 
             if amount:
-                filters &= dmodels.Q(tickets=amount)
+                filters &= Q(tickets=amount)
             
             if game:
-                filters &= dmodels.Q(game=game)
+                filters &= Q(game=game)
 
             if public_or_private:
                 if public_or_private == 1:
-                    filters &= dmodels.Q(public=True)
+                    filters &= Q(public=True)
                 elif public_or_private == 2:
-                    private_filters = dmodels.Q(
+                    private_filters = Q(
                         Q(created_by__public_key=user_public_key)
                         | Q(players__public_key=user_public_key)
                         | Q(winner__public_key=user_public_key)
                     )
-                    filters &= (dmodels.Q(public=False) & private_filters)
+                    filters &= (Q(public=False) & private_filters)
             else:
-                private_filters = dmodels.Q(
+                private_filters = Q(
                 Q(created_by__public_key=user_public_key)
                 | Q(players__public_key=user_public_key)
                 | Q(winner__public_key=user_public_key)
                 )
                 filters &= (
-                    dmodels.Q(public=True) | private_filters
+                    Q(public=True) | private_filters
                 )
 
-            rooms = models.Room.objects.filter(filters).distinct()
+            rooms = Room.objects.filter(filters).distinct()
 
             order_char = '-' if order == 'desc' else ''
             if order_by == 'created_by':
@@ -296,7 +296,7 @@ def filter_personal_rooms(request):
             order_by = request.data['order_by'] 
             order = request.data['order'] #asc, desc
 
-            rooms = models.Room.objects.filter(
+            rooms = Room.objects.filter(
                 Q(created_by__public_key=public_key) |
                 Q(players__public_key=public_key) |
                 Q(winner__public_key=public_key)
@@ -360,7 +360,7 @@ def view_room(request, id):
 
             public_key = request.data['public_key']
 
-            room = models.Room.objects.filter(
+            room = Room.objects.filter(
                 # Q(created_by__public_key=public_key) |
                 # Q(players__public_key=public_key) |
                 # Q(winner__public_key=public_key) &

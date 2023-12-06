@@ -1,14 +1,15 @@
-FROM node:14.16
+FROM node:14.16-buster
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 ARG ENV
 
-ARG REACT_APP_API_SERVER_ADDRESS
-ENV REACT_APP_API_SERVER_ADDRESS $REACT_APP_API_SERVER_ADDRESS
+ARG http://localhost:8001
+ENV http://localhost:8001 http://localhost:8001
 
-ARG REACT_APP_WS_SERVER_ADDRESS
-ENV REACT_APP_WS_SERVER_ADDRESS $REACT_APP_WS_SERVER_ADDRESS
+ARG ws://localhost:8001/ws/
+ENV ws://localhost:8001/ws/ ws://localhost:8001/ws/
 
 COPY . ./
 
+RUN bash -c "cd /app && npm install"
 RUN echo "**********************RUNNING IN" $ENV "MODE**********************" \

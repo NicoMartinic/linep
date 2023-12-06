@@ -6,39 +6,37 @@
 * Docker for Windows:
     * https://docs.docker.com/desktop/install/windows-install/
 
-# Next you need to open a terminal where the frontend folder is and execute the following commands 
-# For example: C:\Users\nicom\OneDrive\Documents\GitHub\linep\linep-backend>
-
-* `cd linepsite/`
+# Next you need to open a terminal where the project folder is and execute the following commands 
+# For example: C:\Users\nicom\OneDrive\Documents\GitHub\linep>
 
 * Copy and edit the `.env`:
     * Development: `cp .env-dev .env` <- Use this 
     * Production: `cp .env-prod .env`
 
 * Execute docker-compose:
-    * `sudo docker-compose build` 
-    * `sudo docker-compose up`
+    * `docker-compose build` 
+    * `docker-compose up`
 
 * Once the containers are up:
-* On Linux:
-    * `docker ps` #Search for the container id of the backend
-    * `docker exec -it container_id bash` #Container_id is
+* On the terminal:
+    * `docker exec -it backend bash` 
     # Once inside the container
-    * `python3 manage.py makemigrations backend`
+    * `python3 manage.py makemigrations app`
     * `python3 manage.py migrate`
 
 * Para crear datos iniciales en la db tirar en el browser el siguiente endpoint:
     * Para desarrollo con datos de prueba: `http://localhost:8001/init_db/?create_testing_data=true`
-    * Para produccion sin datos de prueba: `http://localhost:8001/init_db/`
     * Para actualizar los modulos: `http://localhost:8001/init_db/?update_modules=true`
 
 * Para reiniciar la BD:
     * `docker exec -it container_id bash`
     * `python3 manage.py flush`
-    * `python3 manage.py migrate backend zero`
-    * `python3 manage.py sqlsequencereset backend`
+    * `python3 manage.py migrate app zero`
+    * `python3 manage.py sqlsequencereset app`
 
 * Ejecutar docker-compose para el pgadmin:
+    * On vscode terminal:
+        * docker run -p 8111:80 -e 'PGADMIN_DEFAULT_EMAIL=admin@admin.com' -e 'PGADMIN_DEFAULT_PASSWORD=admin' -d dpage/pgadmin4
     * docker run -p 8111:80 \
      -e 'PGADMIN_DEFAULT_EMAIL=admin@admin.com' \
      -e 'PGADMIN_DEFAULT_PASSWORD=admin' \
@@ -75,3 +73,26 @@
     * CADUCADO PERO LO DEJO POR LAS DUDAS: Para poner un breakpoint en cualquier parte del codigo usar: `breakpoint()`
     * Desde el vscode ir al menu para debug e iniciar el debugger cliente
     * Para poner un breakpoint usar los puntitos rojos de vscode
+
+
+FRONT
+
+# To start the docker container for the frontend you need to take the following steps
+
+# If you don't have docker/docker-compose you need to install it
+* Docker for Linux:
+    * https://docs.docker.com/engine/install/ubuntu/
+* Docker for Windows:
+    * https://docs.docker.com/desktop/install/windows-install/
+
+# Next you need to open a terminal where the frontend folder is and execute the following commands 
+# For example: C:\Users\nicom\OneDrive\Documents\GitHub\linep\linep-frontend>
+* Copy and edit the `.env`:
+    * Development: `cp .env-dev .env` <- Use this 
+    * Production: `cp .env-prod .env`
+
+* Execute docker-compose:
+    * `sudo docker-compose build`
+    * `sudo docker-compose up`
+
+* Once that is done you can now access to `http://localhost:3000/` in your browser to see the project in your local machine

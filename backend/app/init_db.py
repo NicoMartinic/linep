@@ -4,10 +4,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions, status
 from django.conf import settings
 from django.contrib.auth.models import Group, Permission, PermissionManager
-from backend.models import CustomUser, Module
+from app.models import CustomUser, Module, Room
 from django.db import transaction
 from django.contrib.auth.models import Group
-from backend.models import CustomUser, Room
 
 management_permissions = [
     #log

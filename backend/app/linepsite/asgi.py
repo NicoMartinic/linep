@@ -11,7 +11,7 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'linepsite.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.linepsite.settings')
 
 default_app = get_asgi_application()
 
