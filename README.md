@@ -9,10 +9,6 @@
 # Next you need to open a terminal where the project folder is and execute the following commands 
 # For example: C:\Users\nicom\OneDrive\Documents\GitHub\linep>
 
-* Copy and edit the `.env`:
-    * Development: `cp .env-dev .env` <- Use this 
-    * Production: `cp .env-prod .env`
-
 * Execute docker-compose:
     * `docker-compose build` 
     * `docker-compose up`
@@ -28,11 +24,12 @@
     * Para desarrollo con datos de prueba: `http://localhost:8001/init_db/?create_testing_data=true`
     * Para actualizar los modulos: `http://localhost:8001/init_db/?update_modules=true`
 
-* Para reiniciar la BD:
-    * `docker exec -it container_id bash`
-    * `python3 manage.py flush`
-    * `python3 manage.py migrate app zero`
-    * `python3 manage.py sqlsequencereset app`
+> .[!NOTE].
+>   * To reset database:
+        * `docker exec -it container_id bash`
+        * `python3 manage.py flush`
+        * `python3 manage.py migrate app zero`
+        * `python3 manage.py sqlsequencereset app`
 
 * Ejecutar docker-compose para el pgadmin:
     * On vscode terminal:
