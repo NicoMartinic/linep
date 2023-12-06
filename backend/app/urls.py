@@ -1,8 +1,7 @@
 from django.urls import path, include
-from . import views, views_rooms, views_users
+from app import views_users, views_rooms, views, init_db
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
-from . import init_db
 
 router = routers.DefaultRouter()
 

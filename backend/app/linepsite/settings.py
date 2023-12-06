@@ -23,39 +23,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = "d@$m(10v04!!_!wbfw__79e5gi^0l)qb&4a+!a_#-5-r#ksz^="
 
-SCHEME = env('SCHEME')
+SCHEME = "http"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG') == "true"
+DEBUG = "true"
 
-ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(",")
+ALLOWED_HOSTS = "127.0.0.1,localhost".split(",")
 
-FRONT_URL = env('FRONT_URL')
+FRONT_URL = "http://localhost:3000"
 
 # Application definition
 
 CELERY_BROKER_URL = "redis://redis:6379"
 CELERY_RESULT_BACKEND = "redis://redis:6379"
-
-CELERY_BEAT_SCHEDULE = { # scheduler configuration
-    'Migrate data from SQL to ES' : {  # whatever the name you want 
-        'task': 'backend.tasks.migrate_from_sql_to_ES', # name of task with path
-        'schedule': 30, # 30 runs this task every 30 seconds
-        'kwargs': {'task_name': 'migrate'}
-    },
-    'Copy pending files from queue' : {  # whatever the name you want 
-        'task': 'backend.tasks.copy_pending_files', # name of task with path
-        'schedule': 30, # 30 runs this task every 30 seconds
-        'kwargs': {'task_name': 'copy'}
-    },
-    'Transcript pending files from queue' : {  # whatever the name you want 
-        'task': 'backend.tasks.transcript_files', # name of task with path
-        'schedule': 30, # 30 runs this task every 30 seconds
-        'kwargs': {'task_name': 'transcript'}
-    }
-}
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -64,9 +46,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'backend',
     'rest_framework',
     'corsheaders',
+    'app'
     #'rest_framework.authtoken',
 ]
 
@@ -81,7 +63,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-ROOT_URLCONF = 'linepsite.urls'
+ROOT_URLCONF = 'app.linepsite.urls'
 
 TEMPLATES = [
     {
@@ -99,7 +81,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'linepsite.wsgi.application'
+WSGI_APPLICATION = 'app.linepsite.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -114,10 +96,10 @@ DATABASES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env('DATABASE_NAME'), 
-        'USER': env('DATABASE_USER'), 
-        'PASSWORD': env('DATABASE_PASSWORD'),
-        'HOST': env('DATABASE_HOST'), 
+        'NAME': "backend", 
+        'USER': "postgres", 
+        'PASSWORD': "postgres",
+        'HOST': "backend-db", 
         'PORT': '5432',
     }
 }
@@ -167,19 +149,19 @@ TOKEN_EXPIRED_AFTER_SECONDS = 43200
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
 #        'rest_framework.authentication.TokenAuthentication',
-        'backend.authentication.ExpiringTokenAuthentication',
+        'app.authentication.ExpiringTokenAuthentication',
     ],
 }
 
 # TODO: Esto debería estar en false y poner los origins correspondientes:
 #CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = env('FRONT_URL').split(",") # [ env('CORS_ORIGIN_WHITELIST') ]
+CORS_ORIGIN_WHITELIST = "http://localhost:3000".split(",") # [ env('CORS_ORIGIN_WHITELIST') ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'Size',
 ]
 
-AUTH_USER_MODEL = 'backend.CustomUser'
+AUTH_USER_MODEL = 'app.CustomUser'
 
 ROLE_MANAGEMENT = 'ADMINISTRATOR'
 ROLE_USER = 'USER'
@@ -228,4 +210,4 @@ MODULES = [
     }
 ]
 
-ENV = env('ENV')
+ENV = "develop"

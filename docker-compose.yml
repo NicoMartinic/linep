@@ -7,27 +7,25 @@ services:
     volumes: 
       - backend-data:/var/lib/postgresql/data/
     environment:
-      POSTGRES_DB: ${DATABASE_NAME}
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      PG_SYSTEM_MAX_CONNECTIONS: ${PG_SYSTEM_MAX_CONNECTIONS}
+      POSTGRES_DB: backend
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PG_SYSTEM_MAX_CONNECTIONS: 10
     ports:
-      - ${PG_PORT}:${PG_PORT}
+      - 5432:5432
     networks:
       - linep-network
   backend:
+    #volumes:
+    #  - ./backend:/code
     build:
-      context: ./backend/linepsite/
+      context: ./backend/
       dockerfile: Dockerfile
     container_name: backend
-    command: ${COMMAND}
-    volumes:
-      - .:/code
+    command: bash -c "python3 -m debugpy --listen 0.0.0.0:5678 -m uvicorn --workers 4 app.linepsite.asgi:application --host 0.0.0.0 --port 8001 --reload"
     ports:
-      - ${BACK_PORT}:${BACK_PORT}
+      - 8001:8001
       - "5678:5678"
-    env_file:
-      - .env
     depends_on:
       - backend-db
     networks:
@@ -36,19 +34,22 @@ services:
     container_name: frontend
     build:
       context: ./frontend/
+      dockerfile: Dockerfile
       args:
-        ENV: ${ENV}
-        REACT_APP_API_SERVER_ADDRESS: ${REACT_APP_API_SERVER_ADDRESS}
-        REACT_APP_WS_SERVER_ADDRESS: ${REACT_APP_WS_SERVER_ADDRESS}
-    volumes:
-      - './:/app/frontend'
-      - './frontend/node_modules:/app/frontend/node_modules'
+        ENV: develop
+        REACT_APP_API_SERVER_ADDRESS: http://localhost:8001
+        REACT_APP_WS_SERVER_ADDRESS: ws://localhost:8001/ws/
+    # volumes:
+      #- './:/app/frontend'
+      # - './frontend/node_modules:/app/frontend/node_modules'
+      # - './frontend:/app/'
+      # - '/app/node_modules'
     ports:
-      - ${PORT}:${PORT}
+      - 3000:3000
     stdin_open: true
     environment:
       - CHOKIDAR_USEPOLLING=true
-    command: ${COMMAND}
+    command: bash -c "cd /app && npm start --port 3000"
     networks:
       - linep-network
 

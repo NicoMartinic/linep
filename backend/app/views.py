@@ -1,8 +1,8 @@
 from django.http import JsonResponse
-from backend.models import CustomUser, Module
+from app.models import CustomUser, Module
 from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
-from backend.serializers import  UserSerializer, ModuleSerializer
+from app.serializers import  UserSerializer, ModuleSerializer
 from django.conf import settings
 from .utils import manage_exception, user_has_group_in_action
 

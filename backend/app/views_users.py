@@ -1,13 +1,13 @@
 from distutils.log import error
 from django.http import JsonResponse
 from django.db import transaction
-from backend import models
+from app.models import CustomUser, MultiToken, Group
 from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.hashers import make_password
-from backend import  serializers
-from backend import authentication
-from backend.utils import error_log, manage_exception
+from app.serializers import UserSerializer
+from app import authentication
+from app.utils import error_log, manage_exception
 import random
 import string
 from django.conf import settings
@@ -19,13 +19,13 @@ def generate_random_string(length):
 def generate_unique_username():
     while True:
         username = generate_random_string(8)  # Generate an 8-character random string
-        if not models.CustomUser.objects.filter(username=username).exists():
+        if not CustomUser.objects.filter(username=username).exists():
             return username
 
 def generate_unique_email():
     while True:
         email = generate_random_string(10) + '@example.com'  # Generate a random email
-        if not models.CustomUser.objects.filter(email=email).exists():
+        if not CustomUser.objects.filter(email=email).exists():
             return email
 
 def generate_random_password():
@@ -54,7 +54,7 @@ def create_login_user(request):
         if 'public_key' not in request.data:
             return JsonResponse({'msg': 'Not getting all the info'}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = models.CustomUser.objects.filter(public_key=request.data['public_key']).first()
+        user = CustomUser.objects.filter(public_key=request.data['public_key']).first()
         if user is None:
             with transaction.atomic():
                 username = generate_unique_username()
@@ -64,7 +64,7 @@ def create_login_user(request):
                 email = generate_unique_email()
 
                 with transaction.atomic():
-                    user = models.CustomUser(
+                    user = CustomUser(
                         username=username,
                         password=password,
                         first_name=first_name,
@@ -75,16 +75,16 @@ def create_login_user(request):
 
                     user.save()
 
-                    user.groups.add(models.Group.objects.filter(name=settings.ROLE_MANAGEMENT).first())
+                    user.groups.add(Group.objects.filter(name=settings.ROLE_MANAGEMENT).first())
                     user.save()
         # Me traigo el token asociado a un usuario o creo uno nuevo.
-        token =  models.MultiToken.objects.filter(user=user).first()
+        token =  MultiToken.objects.filter(user=user).first()
         if token is None:
-            token = models.MultiToken.objects.create(user = user)
+            token = MultiToken.objects.create(user = user)
         
         #token_expire_handler will check, if the token is expired it will generate new one
         is_expired, token = authentication.token_expire_handler(token)
-        user_serialized = serializers.UserSerializer(user)
+        user_serialized = UserSerializer(user)
 
 
         return JsonResponse({
@@ -105,7 +105,7 @@ def create_login_user(request):
 @permission_classes([permissions.IsAuthenticated])
 def logout(request):
     try:
-        token = models.MultiToken.objects.get(key = request.auth.key)
+        token = MultiToken.objects.get(key = request.auth.key)
         token.delete()
         
         return JsonResponse({}, status=status.HTTP_200_OK)
